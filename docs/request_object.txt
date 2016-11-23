@@ -1,0 +1,42 @@
+
+
+# Possible structure of a 'request' object. In the PoC code
+# this is just a schemaless blob, which seems fairly pythonic:
+# if it quacks like a request...
+
+{
+    ## Populated on the client machine at time of request
+
+    # UUN
+    user:  "glee1",
+
+    # Machine the request was made from
+    host:  "S2A-C02MH0PBF5YW",
+
+    # DateTime of the request
+    date:  "2016-11-23 07:28:35",
+
+    # Unique ID for the request (uuidgen?)
+    UUID:  "C6F6C85A-06E9-47AD-95C9-728C85D26AB3",
+
+    # The requested application - what to use as primary key?
+    app:   "Adobe Photshop CC 2015.5",
+
+    # A message from the requester
+    message: "I need to tart up my cat pics",
+		
+    ## Created/Populated by the server
+
+    # UUN or email, or both?
+    approver:      [ "glee1", "eca.support@ed.ac.uk" ],
+
+    # Enum - Approved/Denied/pending ?
+    status:        "Approved",
+
+    # DateTime of approval/denial
+    actioned_at:   "2016-11-23 07:29:35",
+
+    # A field to store information about processing error
+    error:         None 
+
+}
