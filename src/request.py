@@ -86,7 +86,6 @@ class JSSTools(object):
         user = self._get_user_object(uun)
         reqs = self._b64_to_object(user.find(".//extension_attribute[name='App Requests']/value").text) or []
         reqs.append(newreq)
-        RMAL  request.py +
         user.find(".//extension_attribute[name='App Requests']/value").text = self._object_to_b64(reqs)
         user.save
 
