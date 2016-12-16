@@ -207,7 +207,9 @@ class JSSTools(object):
                    msg=newreq['message'],
                    UUID=newreq['UUID'])
 
-        self.contact_user(newreq['approver'], subject, m)
+        from_address = self.get_user_object(newreq['UUN']).find('.//email').text
+
+        self.contact_user(newreq['approver'], subject, m, from_address)
 
     def update_user_request(self, user, newreq):
         reqs = self._b64_to_object(user.find(".//extension_attribute[name='App Requests']/value").text)
@@ -221,8 +223,7 @@ class JSSTools(object):
     def get_user_object(self, uun):
         return self.jss.User(uun)
 
-    def contact_user(self, to, subject, message):
-        us = 'donotreply@ed.ac.uk'
+    def contact_user(self, to, subject, message, us='donotreply@ed.ac.uk'):
         s = smtplib.SMTP('localhost')
         s.sendmail(us, to, "Subject: "+subject+"\n\n"+message)
         s.quit
