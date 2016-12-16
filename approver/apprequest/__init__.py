@@ -45,8 +45,8 @@ class Request(object):
         with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_approved.tmpl') as f:
             msg = f.read()
 
-        msg.format(UUN=self.attributes['UUN'], policy=self.attributes['policy'])
-        self.j.contact_user(self.user.find('.//email').text, subject, msg)
+        m = msg.format(UUN=self.attributes['UUN'], policy=self.attributes['policy'])
+        self.j.contact_user(self.user.find('.//email').text, subject, m)
 
 
     def update(self):
@@ -63,10 +63,10 @@ class Request(object):
         with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_denied.tmpl','r') as f:
             msg = f.read()
 
-        msg.format(UUN=self.attributes['UUN'], 
+        m = msg.format(UUN=self.attributes['UUN'], 
                    policy=self.attributes['policy'], 
                    denial_reason=reason)
-        self.j.contact_user(self.user.find('.//email').text, subject, msg)
+        self.j.contact_user(self.user.find('.//email').text, subject, m)
 
         self.j.update_user_request(self.user, self.attributes)
 
@@ -183,30 +183,31 @@ class JSSTools(object):
         with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_confirmation.tmpl','r') as f:
             msg = f.read()
 
-        reqdate = datetime.datetime.strptime(newreq['date'],
+        reqdate = datetime.strptime(newreq['date'],
                                           "%Y-%m-%dT%H:%M:%S.%f")
         
         subject = "Request for {policy} submitted".format(policy=newreq['policy'])
-        msg.format(policy=newreq['policy'],
+        m = msg.format(policy=newreq['policy'],
                    date=reqdate.strftime("%Y-%m-%d, %H:%M"),
                    UUN=newreq['UUN'])
-        self.contact_user(user.find('.//email').text, subject, msg)
+        self.contact_user(user.find('.//email').text, subject, m)
 
     def send_to_approver(self, newreq):
         with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_to_approver.tmpl', 'r') as f:
             msg = f.read()
 
-        reqdate = datetime.datetime.strptime(newreq['date'],
+        reqdate = datetime.strptime(newreq['date'],
                                           "%Y-%m-%dT%H:%M:%S.%f")
         
         
         subject = "Request for {policy}".format(policy=newreq['policy'])
-        msg.format(policy=newreq['policy'],
+        m = msg.format(policy=newreq['policy'],
                    date=reqdate.strftime("%Y-%m-%d, %H:%M"),
                    UUN=newreq['UUN'],
-                   msg=newreq['message'])
+                   msg=newreq['message'],
+                   UUID=newreq['UUID'])
 
-        self.contact_user(newreq['approver'], subject, msg)
+        self.contact_user(newreq['approver'], subject, m)
 
     def update_user_request(self, user, newreq):
         reqs = self._b64_to_object(user.find(".//extension_attribute[name='App Requests']/value").text)
@@ -222,17 +223,9 @@ class JSSTools(object):
 
     def contact_user(self, to, subject, message):
         us = 'donotreply@ed.ac.uk'
-        m = MIMEText(message)
-        m['Subject'] = subject
-        m['From'] = us
-        m['To'] = to
-
-        if self.debug:
-            print m
-        else:
-            s = smtplib.SMTP('localhost')
-            s.send_message(m)
-            s.quit
+        s = smtplib.SMTP('localhost')
+        s.sendmail(us, to, "Subject: "+subject+"\n\n"+message)
+        s.quit
 
     def _b64_to_object(self, blob):
         if blob is not None:
