@@ -180,7 +180,7 @@ class JSSTools(object):
         self.send_to_approver(newreq)
 
     def send_confirmation(self, user, newreq):
-        with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_confiromation.tmpl','r') as f:
+        with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_confirmation.tmpl','r') as f:
             msg = f.read()
 
         reqdate = datetime.datetime.strptime(newreq['date'],
