@@ -230,7 +230,7 @@ class JSSTools(object):
         if self.debug:
             print m
         else:
-            s = smtplib.SMTP(localhost)
+            s = smtplib.SMTP('localhost')
             s.send_message(m)
             s.quit
 
