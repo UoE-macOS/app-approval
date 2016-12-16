@@ -28,32 +28,42 @@ class Request(object):
     def approve(self):
         if self.attributes['status'] != 'Pending':
             raise ValueError("Request already handled: "+self.attributes['status'])
-        if 'policy' not in self.attributes:
-            self.attributes['policy'] = "Unknown application"
-        self.attributes['status'] = 'Approved'
-        self.attributes['actioned_at'] = datetime.now().isoformat()
 
-	self.j.approve(self.user, self.attributes['policy'])
+	try:
+	    self.j.approve(self.user, self.attributes['policy'])
+            self.attributes['status'] = 'Approved'
+            self.attributes['actioned_at'] = datetime.now().isoformat()
 
-        subject = "Request for {} approved".format(self.attributes['policy'])
-        msg = "Your request to install {} has been approved. It is now available to install through the JSS software catalogue".format(self.attributes['policy'])
-        self.j.contact_user(self.user, subject, msg)
+            subject = "Request for {} approved".format(self.attributes['policy'])
+	    with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_approved.tmpl') as f:
+	        msg = f.read()
+
+	    msg.format(self.attributes['UUN'], self.attributes['policy'])
+            self.j.contact_user(self.user.find('.//email').text, subject, msg)
+
+	except ValueError, e:
+	    self.attributes['error'] = str(e)
 
 	self.j.update_user_request(self.user, self.attributes)
 
     def update(self):
 	self.j.update_user_request(self.user, self.attributes)
 
-    def deny(self):
+    def deny(self, reason="Request denied"):
         if self.attributes['status'] != 'Pending':
             raise ValueError("Request already handled: "+self.attributes['status'])
-        if 'policy' not in self.attributes:
-            self.attributes['policy'] = "Unknown application"
+
         self.attributes['status'] = 'Denied'
         self.attributes['actioned_at'] = datetime.now().isoformat()
         subject = "Request for {} denied".format(self.attributes['policy'])
-        msg = "Your request to install {} has been denied.".format(self.attributes['policy'])
-        self.j.contact_user(self.user, subject, msg)
+
+	with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_denied.tmpl','r') as f:
+	    msg = f.read()
+
+	msg.format(UUN=self.attributes['UUN'], 
+		   policy=self.attributes['policy'], 
+                   denial_reason=reason)
+        self.j.contact_user(self.user.find('.//email').text, subject, msg)
 
 	self.j.update_user_request(self.user, self.attributes)
 
@@ -127,7 +137,7 @@ class JSSTools(object):
         return requests
 
     def get_usergroup(self, policy):
-	groupname = "approved_"+policy
+	groupname = "Approved - "+policy
 	group = self.jss.UserGroup(groupname)
 	return group.id	
 
@@ -137,6 +147,7 @@ class JSSTools(object):
         match = []
         if reqs:
             match = [r for r in reqs if r['UUID'] == UUID]
+            print "Found existing req"
         return match
 
     def get_user_requests_uun(self, uun):
@@ -159,7 +170,38 @@ class JSSTools(object):
         reqs = self._b64_to_object(user.find(".//extension_attribute[name='App Requests']/value").text) or []
         reqs.append(newreq)
         user.find(".//extension_attribute[name='App Requests']/value").text = self._object_to_b64(reqs)
-        user.save
+        user.save()
+        self.send_confirmation(user, newreq)
+        self.send_to_approver(newreq)
+
+    def send_confirmation(self, user, newreq):
+        with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_confiromation.tmpl','r') as f:
+            msg = f.read()
+
+        reqdate = datetime.datetime.strptime(newreq['date'],
+                                          "%Y-%m-%dT%H:%M:%S.%f")
+        
+        subject = "Request for {policy} submitted".format(policy=newreq['policy'])
+        msg.format(policy=newreq['policy'],
+                   date=reqdate.strftime("%Y-%m-%d, %H:%M"),
+                   UUN=newreq['UUN'])
+        self.contact_user(user.find('.//email').text, subject, msg)
+
+    def send_to_approver(self, newreq):
+        with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_to_approver.tmpl', 'r') as f:
+            msg = f.read()
+
+        reqdate = datetime.datetime.strptime(newreq['date'],
+                                          "%Y-%m-%dT%H:%M:%S.%f")
+        
+        
+        subject = "Request for {policy}".format(policy=newreq['policy'])
+        msg.format(policy=newreq['policy'],
+                   date=reqdate.strftime("%Y-%m-%d, %H:%M"),
+                   UUN=newreq['UUN'],
+                   msg=newreq['message'])
+
+        self.contact_user(newreq['approver'], subject, msg)
 
     def update_user_request(self, user, newreq):
         reqs = self._b64_to_object(user.find(".//extension_attribute[name='App Requests']/value").text)
@@ -173,13 +215,12 @@ class JSSTools(object):
     def get_user_object(self, uun):
         return self.jss.User(uun)
 
-    def contact_user(self, user, subject, message):
-        them = user.find('.//email').text
+    def contact_user(self, to, subject, message):
         us = 'donotreply@ed.ac.uk'
         m = MIMEText(message)
         m['Subject'] = subject
         m['From'] = us
-        m['To'] = them
+        m['To'] = to
 
 	if self.debug:
             print m
@@ -197,8 +238,10 @@ class JSSTools(object):
         return base64.b64encode(json.dumps(requests))
 
     def harvest(self):
-        computer_reqs = self.get_all_computer_reqs()
+        computer_reqs = self.get_all_computer_requests()
         for req in computer_reqs:
-            if not self.get_user_request(req['uun'], req['UUID']):
-                self.add_user_request(req['uun'], req)
+	    print 'Processing '+req['UUID']
+            if not self.get_user_request(req['UUN'], req['UUID']):
+   		print "Adding user request "+req['UUID']
+                self.add_user_request(req['UUN'], req)
 
