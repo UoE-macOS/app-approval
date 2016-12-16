@@ -1,0 +1,28 @@
+<html>
+<head></head>
+<body>
+Request {{uuid}} from user {{uun}}
+<br><br>
+Request for: {{policy}}<br>
+Requested by: {{UUN}}<br>
+Requested at: {{date}}<br>
+Requested from: {{host}}<br>
+Message from user: {{message}}<br><br>
+
+Status: {{status}}<br>
+
+
+<br><br>
+<form method="post", action="/request/{{UUN}}/{{UUID}}/process">
+Do you want to approve or deny the request?
+<br><br>
+<input type="radio", name="response", value="approve">Approve<br>
+<input type="radio", name="response", value="deny">Deny<br>
+
+Message (will be seen by the requester):
+<input type="textfield", name="message">
+
+<br><br>
+<input type="submit" >
+</body>
+</html>
