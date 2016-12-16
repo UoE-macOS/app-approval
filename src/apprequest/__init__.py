@@ -22,32 +22,35 @@ class Request(object):
             self.attributes = self.j.get_user_requests_all(UUID)[0]
             self.user = self.j.get_user_object(self.attributes['UUN'])
 
-	if 'status' not in self.attributes:
-	    self.attributes['status'] = 'Pending'
+        if 'status' not in self.attributes:
+            self.attributes['status'] = 'Pending'
 
     def approve(self):
         if self.attributes['status'] != 'Pending':
             raise ValueError("Request already handled: "+self.attributes['status'])
 
-	try:
-	    self.j.approve(self.user, self.attributes['policy'])
+        try:
+            # Add user to group, then update the request
+            self.j.approve(self.user, self.attributes['policy'])
             self.attributes['status'] = 'Approved'
             self.attributes['actioned_at'] = datetime.now().isoformat()
+        except ValueError, e:
+            self.attributes['error'] = str(e)
+            raise e
+        finally:
+            self.j.update_user_request(self.user, self.attributes)
 
-            subject = "Request for {} approved".format(self.attributes['policy'])
-	    with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_approved.tmpl') as f:
-	        msg = f.read()
 
-	    msg.format(self.attributes['UUN'], self.attributes['policy'])
-            self.j.contact_user(self.user.find('.//email').text, subject, msg)
+        subject = "Request for {} approved".format(self.attributes['policy'])
+        with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_approved.tmpl') as f:
+            msg = f.read()
 
-	except ValueError, e:
-	    self.attributes['error'] = str(e)
+        msg.format(UUN=self.attributes['UUN'], policy=self.attributes['policy'])
+        self.j.contact_user(self.user.find('.//email').text, subject, msg)
 
-	self.j.update_user_request(self.user, self.attributes)
 
     def update(self):
-	self.j.update_user_request(self.user, self.attributes)
+        self.j.update_user_request(self.user, self.attributes)
 
     def deny(self, reason="Request denied"):
         if self.attributes['status'] != 'Pending':
@@ -55,17 +58,17 @@ class Request(object):
 
         self.attributes['status'] = 'Denied'
         self.attributes['actioned_at'] = datetime.now().isoformat()
+
         subject = "Request for {} denied".format(self.attributes['policy'])
+        with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_denied.tmpl','r') as f:
+            msg = f.read()
 
-	with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_denied.tmpl','r') as f:
-	    msg = f.read()
-
-	msg.format(UUN=self.attributes['UUN'], 
-		   policy=self.attributes['policy'], 
+        msg.format(UUN=self.attributes['UUN'], 
+                   policy=self.attributes['policy'], 
                    denial_reason=reason)
         self.j.contact_user(self.user.find('.//email').text, subject, msg)
 
-	self.j.update_user_request(self.user, self.attributes)
+        self.j.update_user_request(self.user, self.attributes)
 
 
 class Approvers(object):
@@ -87,10 +90,12 @@ class Approvers(object):
         elif '-' in host:
             area = host.split('-')[0].upper()
         else:
-            #raise ValueError("Machine name has no area identifier")
-            return ''
+            raise ValueError("Machine name has no area identifier")
 
-        return self.approvers[area]
+        try:
+            return self.approvers[area]
+        except KeyError, e:
+            raise KeyError("No approver defined for area "+area)
 
 class JSSTools(object):
     """ Take a JSS object, run through looking for app requests and generate a
@@ -101,15 +106,15 @@ class JSSTools(object):
         prefs = jss.JSSPrefs()
         self.jss = jss.JSS(prefs)
         self.approvers = Approvers()
-	self.debug = debug
+        self.debug = debug
 
     def approve(self, user, policy):
-	xml = "<user_group><user_additions><user><id>{}</id></user></user_additions></user_group>".format(user.id)
-	put_object = ElementTree.fromstring(xml)
+        xml = "<user_group><user_additions><user><id>{}</id></user></user_additions></user_group>".format(user.id)
+        put_object = ElementTree.fromstring(xml)
         usergroup = self.get_usergroup(policy)
-	
-	self.jss.put('/usergroups/id/{}'.format(usergroup),
-	      put_object)
+        
+        self.jss.put('/usergroups/id/{}'.format(usergroup),
+              put_object)
 
     def _get_computer_reqs(self, computer_id):
         """ Get the requests from the computer object
@@ -123,7 +128,7 @@ class JSSTools(object):
                 r['host'] = comp.find('.//name').text
                 r['approver'] = self.approvers.get_approver(r['host'])
                 r['status'] = "Pending"
-	return req_list
+        return req_list
 
     def get_all_computer_requests(self):
         """ Get a list of request objects from all computer objects in the JSS
@@ -137,9 +142,9 @@ class JSSTools(object):
         return requests
 
     def get_usergroup(self, policy):
-	groupname = "Approved - "+policy
-	group = self.jss.UserGroup(groupname)
-	return group.id	
+        groupname = "Approved - "+policy
+        group = self.jss.UserGroup(groupname)
+        return group.id 
 
     def get_user_request(self, uun, UUID):
         user = self.get_user_object(uun)
@@ -163,7 +168,7 @@ class JSSTools(object):
             reqs = self._b64_to_object(uo.find(".//extension_attribute[name='App Requests']/value").text)
             if reqs:
                 req_list.extend([r for r in reqs if r['UUID'] == UUID])
-	return req_list
+        return req_list
 
     def add_user_request(self, uun, newreq):
         user = self.get_user_object(uun)
@@ -222,16 +227,16 @@ class JSSTools(object):
         m['From'] = us
         m['To'] = to
 
-	if self.debug:
+        if self.debug:
             print m
-	else:
+        else:
             s = smtplib.SMTP(localhost)
             s.send_message(m)
             s.quit
 
     def _b64_to_object(self, blob):
-	if blob is not None:
-	    return json.loads(base64.b64decode(blob))
+        if blob is not None:
+            return json.loads(base64.b64decode(blob))
         return []
 
     def _object_to_b64(self, requests):
@@ -240,8 +245,8 @@ class JSSTools(object):
     def harvest(self):
         computer_reqs = self.get_all_computer_requests()
         for req in computer_reqs:
-	    print 'Processing '+req['UUID']
+            print 'Processing '+req['UUID']
             if not self.get_user_request(req['UUN'], req['UUID']):
-   		print "Adding user request "+req['UUID']
+                print "Adding user request "+req['UUID']
                 self.add_user_request(req['UUN'], req)
 
