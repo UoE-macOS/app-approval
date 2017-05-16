@@ -48,7 +48,7 @@ class Request(object):
     def update(self):
         self.j.update_user_request(self.user, self.attributes)
 
-    def deny(self, approver='No approver specified', reason="Request denied"):
+    def deny(self, reason="Request denied", approver='No approver specified'):
         if self.attributes['status'] != 'Pending':
             raise ValueError("Request already handled: "+self.attributes['status'])
 
@@ -60,8 +60,7 @@ class Request(object):
         with open(self.j.templates + '/template_email_denied.tmpl','r') as f:
             msg = f.read()
 
-        m = msg.format(policy=self.attributes['policy'], 
-                       denial_reason=reason,
+        m = msg.format(denial_reason=reason,
 		       **self.attributes)
         self.j.contact_user(self.user.find('.//email').text, subject, m)
 
