@@ -15,6 +15,8 @@ class Approvers(object):
             self.approvers = json.load(f)
 
     def get_approver(self, host):
+        return "g.lee@ed.ac.uk"
+        
         if host[-8:] == 'ed.ac.uk':
             area = host.split('.')[-4].upper()
         elif '-' in host:

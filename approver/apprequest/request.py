@@ -8,7 +8,7 @@ class Request(object):
     """
 
     def __init__(self, UUID, uun=None):
-        self.j = JSSTools()
+        self.j = JSSTools('/localdisk/macated/config.ini')
 
         if uun:
             self.attributes = self.j.get_user_request(uun, UUID)[0]
@@ -39,7 +39,7 @@ class Request(object):
 
 
         subject = "Request for {} approved".format(self.attributes['policy'])
-        with open(self.templates + '/template_email_approved.tmpl') as f:
+        with open(self.j.templates + '/template_email_approved.tmpl') as f:
             msg = f.read()
 
         m = msg.format(UUN=self.attributes['UUN'], policy=self.attributes['policy'])
@@ -59,7 +59,7 @@ class Request(object):
 	    self.attributes['approver'] = approver
 
         subject = "Request for {} denied".format(self.attributes['policy'])
-        with open(self.templates + '/template_email_denied.tmpl','r') as f:
+        with open(self.j.templates + '/template_email_denied.tmpl','r') as f:
             msg = f.read()
 
         m = msg.format(UUN=self.attributes['UUN'], 
