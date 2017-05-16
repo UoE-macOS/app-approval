@@ -2,6 +2,7 @@ import base64
 import jss
 import json
 import smtplib
+from ConfigParser import ConfigParser
 from email.mime.text import MIMEText
 from datetime import datetime
 from xml.etree import ElementTree
@@ -42,7 +43,7 @@ class Request(object):
 
 
         subject = "Request for {} approved".format(self.attributes['policy'])
-        with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_approved.tmpl') as f:
+        with open(self.templates + '/template_email_approved.tmpl') as f:
             msg = f.read()
 
         m = msg.format(UUN=self.attributes['UUN'], policy=self.attributes['policy'])
@@ -60,7 +61,7 @@ class Request(object):
         self.attributes['actioned_at'] = datetime.now().isoformat()
 
         subject = "Request for {} denied".format(self.attributes['policy'])
-        with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_denied.tmpl','r') as f:
+        with open(self.templates + '/template_email_denied.tmpl','r') as f:
             msg = f.read()
 
         m = msg.format(UUN=self.attributes['UUN'], 
@@ -75,13 +76,13 @@ class Approvers(object):
     """ Wrapper for getting & returning approvers
     """
 
-    def __init__(self):
+    def __init__(self, approvers_file):
 
         # Right now, expecting a text file that contains a JSON
         # dict, with a list of approvers by each key e.g.
         # {'S48': 'seesup@ed.ac.uk',
         #  'ENG': 'seesup@ed.ac.uk'}
-        with open('/localdisk/macated/approvers.txt', 'r') as f:
+        with open(approvers_file, 'r') as f:
             self.approvers = json.load(f)
 
     def get_approver(self, host):
@@ -102,10 +103,30 @@ class JSSTools(object):
     list of requet objects
     """
 
-    def __init__(self, debug=False):
-        prefs = jss.JSSPrefs()
-        self.jss = jss.JSS(prefs)
-        self.approvers = Approvers()
+    def __init__(self, config_file='', debug=False):
+        if config_file is '':
+            prefs = jss.JSSPrefs()
+            self.jss = jss.JSS(prefs)
+            approvers_file = '/localdisk/macated/approvers.txt'
+            self.templates = '/localdisk/macated/app-requests/venv_1/approver/templates'
+        else:
+            config = ConfigParser()
+            config.read(config_file)
+            url = config.get('jss', 'jss_url')
+            user = config.get('jss', 'jss_user')
+            if config.get('jss', 'jss_password_type') == 'FILE':
+                filename = config.get('jss', 'jss_pass')
+                with open(filename, 'r') as f:
+                    password = f.read().strip()
+            else:
+                password = config.get('jss', 'jss_pass')
+            self.jss = jss.JSS(url=url,
+                               user=user,
+                               password=password)
+            approvers_file = config.get('approvers', 'approver_list')
+            self.templates = config.get('templates', 'template_location')
+
+        self.approvers = Approvers(approvers_file)
         self.debug = debug
 
     def approve(self, user, policy):
@@ -180,7 +201,7 @@ class JSSTools(object):
         self.send_to_approver(newreq)
 
     def send_confirmation(self, user, newreq):
-        with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_confirmation.tmpl','r') as f:
+        with open(self.templates + '/template_email_confirmation.tmpl','r') as f:
             msg = f.read()
 
         reqdate = datetime.strptime(newreq['date'],
@@ -193,7 +214,7 @@ class JSSTools(object):
         self.contact_user(user.find('.//email').text, subject, m)
 
     def send_to_approver(self, newreq):
-        with open('/localdisk/macated/app-requests/venv_1/approver/templates/template_email_to_approver.tmpl', 'r') as f:
+        with open(self.templates + '/template_email_to_approver.tmpl', 'r') as f:
             msg = f.read()
 
         reqdate = datetime.strptime(newreq['date'],
