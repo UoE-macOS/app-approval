@@ -8,7 +8,7 @@ class Request(object):
     """
 
     def __init__(self, UUID, uun=None):
-        self.j = JSSTools('/localdisk/macated/config.ini')
+        self.j = JSSTools(config_file='/localdisk/macated/config.ini')
 
         if uun:
             self.attributes = self.j.get_user_request(uun, UUID)[0]
@@ -20,7 +20,7 @@ class Request(object):
         if 'status' not in self.attributes:
             self.attributes['status'] = 'Pending'
 
-    def approve(self, approver=''):
+    def approve(self, approver='No approver specified'):
         if self.attributes['status'] != 'Pending':
             raise ValueError("Request already handled: "+self.attributes['status'])
 
@@ -29,8 +29,7 @@ class Request(object):
             self.j.approve(self.user, self.attributes['policy'])
             self.attributes['status'] = 'Approved'
             self.attributes['actioned_at'] = datetime.now().isoformat()
-	    if approver is not '':
-		self.attributes['approver'] = approver
+	    self.attributes['actioned_by'] = approver
         except ValueError, e:
             self.attributes['error'] = str(e)
             raise e
@@ -42,29 +41,28 @@ class Request(object):
         with open(self.j.templates + '/template_email_approved.tmpl') as f:
             msg = f.read()
 
-        m = msg.format(UUN=self.attributes['UUN'], policy=self.attributes['policy'])
+        m = msg.format(**self.attributes)
         self.j.contact_user(self.user.find('.//email').text, subject, m)
 
 
     def update(self):
         self.j.update_user_request(self.user, self.attributes)
 
-    def deny(self, approver='', reason="Request denied"):
+    def deny(self, approver='No approver specified', reason="Request denied"):
         if self.attributes['status'] != 'Pending':
             raise ValueError("Request already handled: "+self.attributes['status'])
 
         self.attributes['status'] = 'Denied'
         self.attributes['actioned_at'] = datetime.now().isoformat()
-	if approver is not '':
-	    self.attributes['approver'] = approver
+        self.attributes['actioned_by'] = approver
 
         subject = "Request for {} denied".format(self.attributes['policy'])
         with open(self.j.templates + '/template_email_denied.tmpl','r') as f:
             msg = f.read()
 
-        m = msg.format(UUN=self.attributes['UUN'], 
-                   policy=self.attributes['policy'], 
-                   denial_reason=reason)
+        m = msg.format(policy=self.attributes['policy'], 
+                       denial_reason=reason,
+		       **self.attributes)
         self.j.contact_user(self.user.find('.//email').text, subject, m)
 
         self.j.update_user_request(self.user, self.attributes)
