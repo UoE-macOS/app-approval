@@ -29,10 +29,14 @@ def list(uun):
 def landing(uun, uuid):
     if valid_uuid(uuid) and valid_uun(uun):
         try:
+            current_user = request.environ['REMOTE_USER'] 
             req = Request(uuid, uun)
+            print "about to try to template... " + current_user
+            req.attributes['approver'] = current_user
             return render_template('landing.html', **req.attributes)
         except Exception as ex:
-            return render_template('error.html', error='Couldn\'t load request.')
+            print ex.str_error
+            return render_template('error.html', error='Couldn\'t load request.' + ex.str_error)
     else:
         return render_template('error.html', error='Invalid UUID or Username')
 
@@ -44,19 +48,22 @@ def process(uun, uuid):
     msg = request.form['message'] or 'Denied'
 
     req = Request(uuid, uun)
+
+    current_user = request.environ['REMOTE_USER'] 
   
     try:
         if response == 'approve':
-            req.approve()
-            return render_template('success.html', message="Request was successfully approved")
+            req.approve(approver=current_user)
+            return render_template('success.html', message="Request was successfully approved by " + current_user)
         elif response == 'deny':
-            req.deny(msg)       
-            return render_template('success.html', message="Request was successfully denied")
+            req.deny(reason=msg, approver=current_user)       
+            return render_template('success.html', message="Request was successfully denied by " + current_user)
         else:
             abort(400) # Unknown action.
   
-    except Exception as ex: 
-        return render_template('error.html', error="Something went wrong, the request has not been processed: {:s}".format(ex))
+    except Exception as ex:
+        print ex 
+        return render_template('error.html', error="Something went wrong, the request has not been processed: {:s}".format(ex.__doc__))
 
 def _approve():
     return random.choice([True, False])
