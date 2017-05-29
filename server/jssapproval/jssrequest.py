@@ -2,7 +2,7 @@ from datetime import datetime
 from jsstools import JSSTools
 
 
-class Request(object):
+class JSSRequest(object):
     """ Class for handling individual application requests
         Requests are held as JSON blobs in the user objects of the JSS
     """

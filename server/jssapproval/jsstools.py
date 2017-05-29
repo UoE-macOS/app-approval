@@ -13,30 +13,23 @@ class JSSTools(object):
     list of requet objects
     """
 
-    def __init__(self, config_file='', debug=False):
-        if config_file is '':
-            prefs = jss.JSSPrefs()
-            self.jss = jss.JSS(prefs)
-            approvers_file = '/localdisk/macated/approvers.txt'
-            self.templates = '/localdisk/macated/app-requests/venv_1/approver/templates'
-            self.base_url = 'http://eca-gordon.eca.ed.ac.uk:5000'
+    def __init__(self, config_file='/etc/jssapproval/config.ini', debug=False):
+        config = ConfigParser()
+        config.read(config_file)
+        url = config.get('jss', 'jss_url')
+        user = config.get('jss', 'jss_user')
+        if config.get('jss', 'jss_password_type') == 'FILE':
+            filename = config.get('jss', 'jss_pass')
+            with open(filename, 'r') as f:
+                password = f.read().strip()
         else:
-            config = ConfigParser()
-            config.read(config_file)
-            url = config.get('jss', 'jss_url')
-            user = config.get('jss', 'jss_user')
-            if config.get('jss', 'jss_password_type') == 'FILE':
-                filename = config.get('jss', 'jss_pass')
-                with open(filename, 'r') as f:
-                    password = f.read().strip()
-            else:
-                password = config.get('jss', 'jss_pass')
-            self.jss = jss.JSS(url=url,
-                               user=user,
-                               password=password)
-            approvers_file = config.get('approvers', 'approver_list')
-            self.templates = config.get('templates', 'template_location')
-            self.base_url = config.get('service', 'base_url')
+            password = config.get('jss', 'jss_pass')
+        self.jss = jss.JSS(url=url,
+                           user=user,
+                           password=password)
+        approvers_file = config.get('approvers', 'approver_list')
+        self.templates = config.get('templates', 'template_location')
+        self.base_url = config.get('service', 'base_url')
 
         self.approvers = Approvers(approvers_file)
         self.debug = debug

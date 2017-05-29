@@ -1,0 +1,3 @@
+include jssapproval/templates/*
+include webapp.wsgi
+include config.ini.example

@@ -1,42 +1,28 @@
 from flask import Flask, abort, render_template, request
 from validation import valid_uuid, valid_uun
-from apprequest import Request
+from jssrequest import JSSRequest
 import random 
 import pprint
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='/usr/share/jssapproval/templates')
 
 api1_base = '/appreq/api/v1.0/'
 ui1_base = '/request/'
-
-@app.route(api1_base + "request/<string:uun>/<string:uuid>/approve", methods=['GET'])
-def approve(uuid):
-    return "This would approve the request with uuid: {:s}".format(uuid)
-
-@app.route(api1_base + "request/<string:uun>/<string:uuid>/deny", methods=['GET'])
-def deny(uuid):
-    return "This would deny the request with uuid: {:s}".format(uuid)
-
-@app.route(api1_base + "request/<string:uun>/<string:uuid>/show", methods=['GET'])
-def show(uuid):
-    return "This would show the request with uuid: {:s}".format(uuid)
-
-@app.route(api1_base + "requests/<string:uun>/list", methods=['GET'])
-def list(uun):
-    return "This would list requests belonging to user: {:s}".format(uun)
 
 @app.route(ui1_base + "<string:uun>/<string:uuid>/view", methods=['GET'])
 def landing(uun, uuid):
     if valid_uuid(uuid) and valid_uun(uun):
         try:
-            current_user = request.environ['REMOTE_USER'] 
-            req = Request(uuid, uun)
+            try: 
+                current_user = request.environ['REMOTE_USER']
+            except KeyError:
+                current_user = 'unknown' 
+            req = JSSRequest(uuid, uun)
             print "about to try to template... " + current_user
             req.attributes['approver'] = current_user
             return render_template('landing.html', **req.attributes)
         except Exception as ex:
-            print ex.str_error
-            return render_template('error.html', error='Couldn\'t load request.' + ex.str_error)
+            return render_template('error.html', error='Couldn\'t load request.' + str(ex))
     else:
         return render_template('error.html', error='Invalid UUID or Username')
 
@@ -47,10 +33,13 @@ def process(uun, uuid):
     response = request.form['response'] 
     msg = request.form['message'] or 'Denied'
 
-    req = Request(uuid, uun)
+    req = JSSRequest(uuid, uun)
 
-    current_user = request.environ['REMOTE_USER'] 
-  
+    try:
+        current_user = request.environ['REMOTE_USER']
+    except KeyError:
+        current_user = 'unknown' 
+    
     try:
         if response == 'approve':
             req.approve(approver=current_user)
@@ -62,14 +51,7 @@ def process(uun, uuid):
             abort(400) # Unknown action.
   
     except Exception as ex:
-        print ex 
-        return render_template('error.html', error="Something went wrong, the request has not been processed: {:s}".format(ex.__doc__))
-
-def _approve():
-    return random.choice([True, False])
-
-def _deny():
-    return random.choice([True, False])
+        return render_template('error.html', error="Failed to process request. Reason : " + str(ex))
 
 
 

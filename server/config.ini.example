@@ -1,0 +1,35 @@
+[service]
+# This is the string used in template emails to construct
+# link URIs back to the service.
+base_url=https://jssapproval.mycorp.com
+
+[templates]
+# You probably don't need to change this
+template_location=/usr/share/jssapproval/templates
+
+[approvers]
+# This isn't used if you are looking up approvers
+# from some kind of directory service
+approver_list=/some/path/approvers.txt
+
+[jss]
+# The URL of your JamfPro JSS
+jss_url=https://your.jss.corp.com
+
+# This needs to be a JSS user with API access to read computer extension attributes
+# read and write user extension attributes; and modify group membership. 
+jss_user=someuser
+
+# If set to FILE, the password can be stored in a separate file for added security.
+jss_password_type=FILE
+
+# If jss_password is set to FILE, this will be treated as 
+# the path to a file containing the password
+jss_pass=/localdisk/macated/jss_pass
+
+# These aren't used at present
+[ad credentials]
+ad_url=ldap://domain.controller.mycorp.com
+ad_user=foo
+ad_password_type=FILE
+ad_pass=/localdisk/macated/ad_pass
