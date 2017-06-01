@@ -1,28 +1,56 @@
-<html>
-<head></head>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+  tr:nth-child(even) {background-color: #f2f2f2}
+  body {font-family: sans-serif}
+  input[type=text] {
+    width: 50%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+  }
+</style>
+</head>
 <body>
-Request {{uuid}} from user {{uun}}
-<br><br>
-Request for: {{policy}}<br>
-Requested by: {{UUN}}<br>
-Requested at: {{date}}<br>
-Requested from: {{host}}<br>
-Message from user: {{message}}<br><br>
-
-Status: {{status}}<br>
-
-
-<br><br>
-<form method="post", action="/request/{{UUN}}/{{UUID}}/process">
+<div id=maincontent>
+<div id=req_id>
+  <p><h2>Viewing details for request id {{uuid}} from user {{UUN}}</h2></p>
+</div>
+<table>
+<tr>
+  <td>Request for</td><td>{{policy}}</td>
+</tr>
+<tr>
+  <td>Requested by</td><td>{{UUN}}</td>
+</tr>
+<tr>
+  <td>Requested at</td><td>{{date}}</td>
+</tr>
+<tr>
+  <td>Requested from</td><td>{{host}}</td>
+</tr>
+<tr>
+  <td>Message from user</td><td>{{message}}</td>
+</tr>
+<tr>
+  <td>Status</td><td>{{status}} {% if status in [ 'Approved', 'Denied' ] %} by {{actioned_by}} {% endif %} at {{actioned_at}}<td>
+</tr>
+</table>
+</div>
+<div id=action>
+{% if status == 'Pending' %}
 Do you want to approve or deny the request?
-<br><br>
+<form method="post", action="/request/{{UUN}}/{{UUID}}/process">
 <input type="radio", name="response", value="approve">Approve<br>
 <input type="radio", name="response", value="deny">Deny<br>
 
 Message (will be seen by the requester):
-<input type="textfield", name="message">
+<input type="text", name="message">
 
 <br><br>
 <input type="submit" >
+{% endif %}
+</div>
 </body>
 </html>
