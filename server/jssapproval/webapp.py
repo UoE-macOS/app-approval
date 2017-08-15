@@ -56,7 +56,7 @@ def process(uun, uuid):
         return render_template('error.html', error='Failed to process request. {}: {}'.format(type(ex).__name__, str(ex)))
 
 @app.route(ui1_base + "<string:uun>/list")
-@app.route(ui1_base + "<string:uun>/list/<string:status>"
+@app.route(ui1_base + "<string:uun>/list/<string:status>")
 def list_requests(uun, status=None):
     if valid_uun(uun):
         try:
