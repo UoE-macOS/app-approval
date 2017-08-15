@@ -54,7 +54,8 @@ def process(uun, uuid):
     except Exception as ex:
         return render_template('error.html', error="Failed to process request. Reason : " + str(ex))
 
-@app.route(ui1_base + "<string:uun>/list", method="GET")
+
+@app.route(ui1_base + "<string:uun>/list", methods=["GET"])
 def list_requests(uun):
     if valid_uun(uun):
         try:
