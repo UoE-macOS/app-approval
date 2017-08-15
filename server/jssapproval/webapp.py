@@ -57,13 +57,14 @@ def process(uun, uuid):
 
 @app.route(ui1_base + "<string:uun>/list")
 @app.route(ui1_base + "<string:uun>/list/<string:status>")
-def list_requests(uun, status=''):
+def list_requests(uun, status=None):
     if valid_uun(uun):
         try:
             tools = JSSTools()
             requests = tools.get_user_requests_uun(uun)
-            if status.lower() in ['approved', 'pending','denied']:
-                requests = [r for r in requests if r['status'].lower() == status.lower()]
+            if status:
+                if status.lower() in ['approved', 'pending','denied']:
+                    requests = [r for r in requests if r['status'].lower() == status.lower()]
             return render_template('request_list.html', UUN=uun, requests=requests)
         except Exception as ex:
             return render_template('error.html', error='No requests found for {}: {} {}'.format(uun, type(ex).__name__, str(ex)))
