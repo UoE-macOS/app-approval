@@ -10,11 +10,7 @@ import traceback
 app = Flask(__name__, template_folder='/usr/share/jssapproval/templates')
 
 api1_base = '/appreq/api/v1.0/'
-ui1_base = '/request/'
-
-@app.route(ui1_base)
-def homepage():
-    return render_template('index.html')
+ui1_base = '/request/'xs
 
 @app.route(ui1_base + "<string:uun>/<string:uuid>/view", methods=['GET'])
 def landing(uun, uuid):
