@@ -29,7 +29,7 @@ class JSSRequest(object):
             self.j.approve(self.user, self.attributes['policy'])
             self.attributes['status'] = 'Approved'
             self.attributes['actioned_at'] = datetime.now().isoformat()
-	    self.attributes['actioned_by'] = approver
+	        self.attributes['actioned_by'] = approver
         except ValueError, e:
             self.attributes['error'] = str(e)
             raise e
