@@ -2,6 +2,7 @@ from flask import Flask, abort, render_template, request
 from validation import valid_uuid, valid_uun
 from jssrequest import JSSRequest
 from jsstools import JSSTools
+from dateutil import parser
 import random 
 import pprint
 
@@ -66,6 +67,12 @@ def list_requests(uun):
     else:
         return render_template('error.html', error='Invalid UUID or Username')
 
+@app.context_processor
+def utility_processor():
+    def format_date(datestring):
+        date = parser.parse(datestring)
+        return date.strftime("%H:%M %d-%m-%Y")
+    return dict(format_date=format_date)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
