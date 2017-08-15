@@ -23,7 +23,7 @@ def landing(uun, uuid):
             req.attributes['approver'] = current_user
             return render_template('landing.html', **req.attributes)
         except Exception as ex:
-            return render_template('error.html', error='Couldn\'t load request.' + str(ex))
+            return render_template('error.html', error='Couldn\'t load request. {}: {}'.format(type(ex).__name__, str(ex)))
     else:
         return render_template('error.html', error='Invalid UUID or Username')
 
@@ -52,8 +52,7 @@ def process(uun, uuid):
             abort(400) # Unknown action.
   
     except Exception as ex:
-        return render_template('error.html', error="Failed to process request. Reason : " + str(ex))
-
+        return render_template('error.html', error='Failed to process request. {}: {}'.format(type(ex).__name__, str(ex)))
 
 @app.route(ui1_base + "<string:uun>/list", methods=["GET"])
 def list_requests(uun):
