@@ -62,7 +62,7 @@ def list_requests(uun, status=None):
         try:
             tools = JSSTools()
             requests = tools.get_user_requests_uun(uun)
-            if status:
+            if status.lower() in ['approved', 'pending','denied']:
                 requests = [r for r in requests if r['status'].lower() == status.lower()]
             return render_template('request_list.html', UUN=uun, requests=requests)
         except Exception as ex:
