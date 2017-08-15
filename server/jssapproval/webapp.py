@@ -57,7 +57,7 @@ def process(uun, uuid):
 
 @app.route(ui1_base + "<string:uun>/list")
 @app.route(ui1_base + "<string:uun>/list/<string:status>")
-def list_requests(uun, status=None):
+def list_requests(uun, status=''):
     if valid_uun(uun):
         try:
             tools = JSSTools()
