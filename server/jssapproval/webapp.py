@@ -63,7 +63,7 @@ def list_requests(uun):
             requests = tools.get_user_requests_uun(uun)
             return render_template('request_list.html', requests=requests)
         except Exception as ex:
-            return render_template('error.html', error='No requests found for {}: {}'.format(uun, str(ex)))
+            return render_template('error.html', error='No requests found for {}: {} {}'.format(uun, type(ex).__name__, str(ex)))
     else:
         return render_template('error.html', error='Invalid UUID or Username')
 
