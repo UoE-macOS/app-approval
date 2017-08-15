@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from jssapproval.jsstools import JSSTools 
 
-j = JSSTools(config_file='/localdisk/macated/config.ini')
+j = JSSTools(config_file='/etc/jssapproval/config.ini')
 
 try:
   j.harvest()

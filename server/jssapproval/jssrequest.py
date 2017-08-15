@@ -8,7 +8,7 @@ class JSSRequest(object):
     """
 
     def __init__(self, UUID, uun=None):
-        self.j = JSSTools(config_file='/localdisk/macated/config.ini')
+        self.j = JSSTools(config_file='/etc/jssapproval/config.ini')
 
         if uun:
             self.attributes = self.j.get_user_request(uun, UUID)[0]
