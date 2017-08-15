@@ -26,9 +26,9 @@
     </tr>
     {% for r in requests %}
     <tr>
-      <td><a href="/request/{{r.attributes['uuid']}}/{{r.attributes['uuid']}}/view">{{r.attributes['policy']}}</a></td>
-      <td>{{r.attributes['date']}}</td>
-      <td>{{r.attributes['status']}} {% if r.attributes['status'] in [ 'Approved', 'Denied' ] %} by {{r.attributes['actioned_by']}} {% endif %} at {{r.attributes['actioned_at']}}<td>
+      <td><a href="/request/{{r['UUN']}}/{{r['UUID']}}/view">{{r['policy']}}</a></td>
+      <td>{{r['date']}}</td>
+      <td>{{r['status']}} {% if r['status'] in [ 'Approved', 'Denied' ] %} by {{r['actioned_by']}} at {{r['actioned_at']}} {% endif %}<td>
     </tr>
     {% endfor %}
   </table>
