@@ -5,11 +5,16 @@ from jsstools import JSSTools
 from dateutil import parser
 import random 
 import pprint
+import traceback
 
 app = Flask(__name__, template_folder='/usr/share/jssapproval/templates')
 
 api1_base = '/appreq/api/v1.0/'
 ui1_base = '/request/'
+
+@app.route(ui1_base)
+def homepage():
+    return render_template('index.html')
 
 @app.route(ui1_base + "<string:uun>/<string:uuid>/view", methods=['GET'])
 def landing(uun, uuid):
@@ -24,7 +29,7 @@ def landing(uun, uuid):
             req.attributes['approver'] = current_user
             return render_template('landing.html', **req.attributes)
         except Exception as ex:
-            return render_template('error.html', error='Couldn\'t load request. {}: {}'.format(type(ex).__name__, str(ex)))
+            return render_template('error.html', error='Couldn\'t load request. {}: {}\n{}'.format(type(ex).__name__, str(ex), traceback.print_exc()))
     else:
         return render_template('error.html', error='Invalid UUID or Username')
 
@@ -67,7 +72,7 @@ def list_requests(uun, status=None):
                     requests = [r for r in requests if r['status'].lower() == status.lower()]
             return render_template('request_list.html', UUN=uun, requests=requests)
         except Exception as ex:
-            return render_template('error.html', error='No requests found for {}: {} {}'.format(uun, type(ex).__name__, str(ex)))
+            return render_template('error.html', error='No requests found for {}: {} {}\n{}'.format(uun, type(ex).__name__, str(ex), traceback.print_exc()))
     else:
         return render_template('error.html', error='Invalid UUID or Username')
 

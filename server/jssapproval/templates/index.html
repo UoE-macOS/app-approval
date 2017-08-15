@@ -1,0 +1,17 @@
+<html>
+<head><title>macOS Supported Desktop Application Approval Portal</title></head>
+<body>
+    <h2>macOS Supported Desktop Application Approval Portal</h2>
+    <p><a href="viewUUN()">View requests for a UUN</a></p>
+</body>
+<script>
+    function viewUUN(){
+        var uun = prompt('Enter UUN');
+        if (uun.length > 0) {
+            window.location="/request/" + uun + "/list";
+        } else {
+            alert('No UUN entered!')
+        }
+    }
+</script>
+</html>
