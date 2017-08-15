@@ -115,12 +115,9 @@ class JSSTools(object):
     def add_user_request(self, uun, newreq):
         user = self.get_user_object(uun)
         reqs = self._b64_to_object(user.find(".//extension_attribute[name='App Requests']/value").text) or []
-        print "Requests before saving: " + str(reqs)
         reqs.append(newreq)
         user.find(".//extension_attribute[name='App Requests']/value").text = self._object_to_b64(reqs)
         user.save()
-        print "Requests after saving: " + str(self._b64_to_object(user.find(".//extension_attribute[name='App Requests']/value").text)
-        print user
         self.send_confirmation(user, newreq)
         self.send_to_approver(newreq)
 
