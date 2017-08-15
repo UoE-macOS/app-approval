@@ -61,7 +61,7 @@ def list_requests(uun):
         try:
             tools = JSSTools()
             requests = tools.get_user_requests_uun(uun)
-            return render_template('request_list.html', requests=requests)
+            return render_template('request_list.html', UUN=uun, requests=requests)
         except Exception as ex:
             return render_template('error.html', error='No requests found for {}: {} {}'.format(uun, type(ex).__name__, str(ex)))
     else:
