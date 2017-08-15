@@ -41,10 +41,12 @@ def main(args):
     request['date'] = get_now()
     request['UUN'] = get_user()
     request['UUID'] = gen_uuid()
+    request['policy'] = APP_NAME
     request['message'] = msg  
 
     try:
         write_request(request)
+        run_recon()
         display_confirmation()
     except Exception as ex:
         raise
@@ -65,7 +67,7 @@ You'll receive an email when it has been processed." buttons {"OK"} default butt
     
     
 def run_recon():
-    check_call(['/usr/local/bin/jamf', recon])
+    check_call(['/usr/local/bin/jamf', 'recon'])
     
 
 def write_request(request, dir=REQUESTS_DIR):
