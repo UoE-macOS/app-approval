@@ -1,18 +1,15 @@
-import json
+import json, urllib2, base64
 
 
 class Approvers(object):
     """ Wrapper for getting & returning approvers
     """
 
-    def __init__(self, approvers_file):
-
-        # Right now, expecting a text file that contains a JSON
-        # dict, with a list of approvers by each key e.g.
-        # {'S48': 'seesup@ed.ac.uk',
-        #  'ENG': 'seesup@ed.ac.uk'}
-        with open(approvers_file, 'r') as f:
-            self.approvers = json.load(f)
+    def __init__(self, url, user, password):
+        request = urllib2.Request("url")
+        base64string = base64.encodestring('%s:%s' % (user, password)).replace('\n', '')
+        request.add_header("Authorization", "Basic %s" % base64string)   
+        self.approvers = json.load(result = urllib2.urlopen(request))
 
     def get_approver(self, host):
         return "g.lee@ed.ac.uk"
@@ -27,4 +24,5 @@ class Approvers(object):
         try:
             return self.approvers[area]
         except KeyError, e:
-            raise KeyError("No approver defined for area "+area)
+            # No approver defined; kick it to Helpline
+            return 'is.helpline@ed.ac.uk'

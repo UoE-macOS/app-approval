@@ -16,22 +16,34 @@ class JSSTools(object):
     def __init__(self, config_file='/etc/jssapproval/config.ini', debug=False):
         config = ConfigParser()
         config.read(config_file)
-        url = config.get('jss', 'jss_url')
-        user = config.get('jss', 'jss_user')
+
+        # JSS config
+        jss_url = config.get('jss', 'jss_url')
+        jss_user = config.get('jss', 'jss_user')
         if config.get('jss', 'jss_password_type') == 'FILE':
-            filename = config.get('jss', 'jss_pass')
-            with open(filename, 'r') as f:
-                password = f.read().strip()
+            with open(config.get('jss', 'jss_pass'), 'r') as f:
+                jss_password = f.read().strip()
         else:
-            password = config.get('jss', 'jss_pass')
-        self.jss = jss.JSS(url=url,
-                           user=user,
-                           password=password)
-        approvers_file = config.get('approvers', 'approver_list')
+            jss_password = config.get('jss', 'jss_pass')
+        self.jss = jss.JSS(url=jss_url,
+                           user=jss_user,
+                           password=jss_password)
+
+        # Approvers config
+        approvers_url = config.get('approvers', 'approvers_url')
+        approvers_user = config.get('approvers', 'approvers_user')
+        if config.get('approvers', 'approver_password_type') == 'FILE':
+            with open(config.get('approver', 'approver_pass'), 'r') as f:
+                approver_password = f.read().strip()
+        else:
+            approver_password = config.get('approver', 'approver_pass')
+        self.approvers = Approvers(url=approvers_url,
+                                   user=approvers_user,
+                                   password=approvers_password)
+        
         self.templates = config.get('templates', 'template_location')
         self.base_url = config.get('service', 'base_url')
 
-        self.approvers = Approvers(approvers_file)
         self.debug = debug
 
     def approve(self, user, policy):
