@@ -10,7 +10,20 @@ template_location=/usr/share/jssapproval/templates
 [approvers]
 # This isn't used if you are looking up approvers
 # from some kind of directory service
-approver_list=/some/path/approvers.txt
+#
+# The URL of the approvers list, in JSON format. This should be secured behind
+# basicauth
+approver_url = https://jssapproval.mycorp.com/approvers.txt
+
+# This is the basicauth user
+approver_user=someusername
+
+# If set to FILE, the password can be stored in a separate file for added security.
+approver_password_type=FILE
+
+# If jss_password is set to FILE, this will be treated as 
+# the path to a file containing the password
+approver_pass=/localdisk/macated/jss_pass
 
 [jss]
 # The URL of your JamfPro JSS

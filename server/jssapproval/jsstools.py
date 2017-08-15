@@ -30,16 +30,16 @@ class JSSTools(object):
                            password=jss_password)
 
         # Approvers config
-        approvers_url = config.get('approvers', 'approvers_url')
-        approvers_user = config.get('approvers', 'approvers_user')
+        approver_url = config.get('approvers', 'approver_url')
+        approver_user = config.get('approvers', 'approver_user')
         if config.get('approvers', 'approver_password_type') == 'FILE':
             with open(config.get('approver', 'approver_pass'), 'r') as f:
                 approver_password = f.read().strip()
         else:
             approver_password = config.get('approver', 'approver_pass')
-        self.approvers = Approvers(url=approvers_url,
-                                   user=approvers_user,
-                                   password=approvers_password)
+        self.approvers = Approvers(url=approver_url,
+                                   user=approver_user,
+                                   password=approver_password)
         
         self.templates = config.get('templates', 'template_location')
         self.base_url = config.get('service', 'base_url')
