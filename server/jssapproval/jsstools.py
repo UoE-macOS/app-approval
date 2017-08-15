@@ -164,7 +164,7 @@ class JSSTools(object):
 
     def contact_user(self, to, subject, message, us='donotreply@ed.ac.uk'):
         s = smtplib.SMTP('localhost')
-	s.sendmail(us, to, "From: "+us+"\nTo:"+to+"\nSubject: "+subject+"\n\n"+message)
+        s.sendmail(us, to, "From: "+us+"\nTo:"+to+"\nSubject: "+subject+"\n\n"+message)
         #s.sendmail(us, to, "Subject: "+subject+"\n\n"+message)
         s.quit
 

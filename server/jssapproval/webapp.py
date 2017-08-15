@@ -1,6 +1,7 @@
 from flask import Flask, abort, render_template, request
 from validation import valid_uuid, valid_uun
 from jssrequest import JSSRequest
+from jsstools import JSSTools
 import random 
 import pprint
 
@@ -53,6 +54,17 @@ def process(uun, uuid):
     except Exception as ex:
         return render_template('error.html', error="Failed to process request. Reason : " + str(ex))
 
+@app.route(ui1_base + "<string:uun>/list", method="GET")
+def list_requests(uun):
+    if valid_uun(uun):
+        try:
+            tools = JSSTools()
+            requests = tools.get_user_requests_uun(uun)
+            return render_template('request_list.html', requests)
+        except Exception as ex:
+            return render_template('error.html', error='No requests found for {}: {}'.format(uun, str(ex)))
+    else:
+        return render_template('error.html', error='Invalid UUID or Username')
 
 
 if __name__ == "__main__":
