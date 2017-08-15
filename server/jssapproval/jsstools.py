@@ -58,7 +58,11 @@ class JSSTools(object):
         """ Get the requests from the computer object
         """
         comp = self.jss.Computer(computer_id)
-        reqs = comp.find(".//extension_attribute[name='App Requests']/value").text.replace("\n","")
+        try:
+            reqs = comp.find(".//extension_attribute[name='App Requests']/value").text.replace("\n","")
+        except AttributeError:
+            # The extension Attribute has no value for this machine
+            reqs = 'None'
         req_list = []
         if (reqs != 'None'):
             req_list = self._b64_to_object(reqs)
