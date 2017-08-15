@@ -13,8 +13,11 @@
 </style>
 </head>
 <body>
+{% if not requests %}
 <div id=maincontent>
-  <h2>Viewing requests from user {{requests[0].attributes['UUN']}}</h2>
+<h2>No requests found for {{UUN}}</h2>
+{% else %}
+  <h2>Viewing requests from user {{UUN}}</h2>
   <table>
     <tr>
       <th>Request for</th>
@@ -29,6 +32,7 @@
     </tr>
     {% endfor %}
   </table>
+{% endif %}
 </div>
 </body>
 </html>
