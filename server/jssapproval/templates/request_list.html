@@ -17,21 +17,14 @@
   <h2>Viewing requests from user {{requests[0].attributes['UUN']}}</h2>
   <table>
     <tr>
-      <th>UUID</th>
       <th>Request for</th>
       <th>Requested on</th>
-      <th>Requested from</th>
-      <th>Message from user</th>
       <th>Status</th>
-      <th>Action</th>
     </tr>
     {% for r in requests %}
     <tr>
-      <td><a href="/request/{{r.attributes['uuid']}}/{{r.attributes['uuid']}}/view">{{r.attributes['uuid']}}</a></td>
-      <td>{{r.attributes['policy'}}</td>
+      <td><a href="/request/{{r.attributes['uuid']}}/{{r.attributes['uuid']}}/view">{{r.attributes['policy']}}</a></td>
       <td>{{r.attributes['date'}}</td>
-      <td>{{r.attributes['host']}}</td>
-      <td>{{r.attributes['message']}}</td>
       <td>{{r.attributes['status']}} {% if r.attributes['status'] in [ 'Approved', 'Denied' ] %} by {{r.attributes['actioned_by'}} {% endif %} at {{r.attributes['actioned_at']}}<td>
     </tr>
     {% endfor %}
