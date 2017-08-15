@@ -63,7 +63,7 @@ def list_requests(uun, status=None):
             tools = JSSTools()
             requests = tools.get_user_requests_uun(uun)
             if status:
-                requests = [r for r in requests if r['status'] == status]
+                requests = [r for r in requests if r['status'].lower() == status.lower()]
             return render_template('request_list.html', UUN=uun, requests=requests)
         except Exception as ex:
             return render_template('error.html', error='No requests found for {}: {} {}'.format(uun, type(ex).__name__, str(ex)))
