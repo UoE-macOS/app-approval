@@ -25,7 +25,7 @@
   <td>Requested by</td><td>{{UUN}}</td>
 </tr>
 <tr>
-  <td>Requested at</td><td>{{date}}</td>
+  <td>Requested at</td><td>{{format_date(date)}}</td>
 </tr>
 <tr>
   <td>Requested from</td><td>{{host}}</td>
@@ -34,7 +34,7 @@
   <td>Message from user</td><td>{{message}}</td>
 </tr>
 <tr>
-  <td>Status</td><td>{{status}} {% if status in [ 'Approved', 'Denied' ] %} by {{actioned_by}} {% endif %} at {{actioned_at}}<td>
+  <td>Status</td><td>{{status}} {% if status in [ 'Approved', 'Denied' ] %} by {{actioned_by}} at {{format_date(actioned_at)}} {% endif %}<td>
 </tr>
 </table>
 </div>

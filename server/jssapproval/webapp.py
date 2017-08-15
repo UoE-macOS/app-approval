@@ -71,7 +71,7 @@ def list_requests(uun):
 def utility_processor():
     def format_date(datestring):
         date = parser.parse(datestring)
-        return date.strftime("%H:%M %d-%m-%Y")
+        return date.strftime("%d-%m-%Y %H:%M")
     return dict(format_date=format_date)
 
 if __name__ == "__main__":

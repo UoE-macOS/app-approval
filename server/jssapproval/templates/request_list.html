@@ -27,8 +27,8 @@
     {% for r in requests %}
     <tr>
       <td><a href="/request/{{r['UUN']}}/{{r['UUID']}}/view">{{r['policy']}}</a></td>
-      <td>{{r['date']}}</td>
-      <td>{{r['status']}} {% if r['status'] in [ 'Approved', 'Denied' ] %} by {{r['actioned_by']}} at {{r['actioned_at']}} {% endif %}<td>
+      <td>{{format_date(r['date'])}}</td>
+      <td>{{r['status']}} {% if r['status'] in [ 'Approved', 'Denied' ] %} by {{r['actioned_by']}} at {{format_date(r['actioned_at'])}} {% endif %}<td>
     </tr>
     {% endfor %}
   </table>
