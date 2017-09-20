@@ -24,11 +24,16 @@
       <th>Requested on</th>
       <th>Status</th>
     </tr>
-    {% for r in requests %}
-    <tr>
+    {% for r in requests | sort(reverse=True, attribute='date') %}
+    <tr> 
       <td><a href="/request/{{r['UUN']}}/{{r['UUID']}}/view">{{r['policy']}}</a></td>
       <td>{{format_date(r['date'])}}</td>
-      <td>{{r['status']}} {% if r['status'] in [ 'Approved', 'Denied' ] %} by {{r['actioned_by']}} at {{format_date(r['actioned_at'])}} {% endif %}<td>
+      <td style="background-color:{% if r['status'] == 'Approved'%} lightgreen {% 
+                                        elif r['status'] == 'Denied' %} red {% else %} yellow 
+                                  {% endif %}" >
+          {{r['status']}} {% if r['status'] in [ 'Approved', 'Denied' ] %} 
+                                by {{r['actioned_by']}} at {{format_date(r['actioned_at'])}} 
+                          {% endif %}<td>
     </tr>
     {% endfor %}
   </table>
