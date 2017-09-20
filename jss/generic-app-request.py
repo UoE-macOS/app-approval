@@ -14,6 +14,7 @@
 # Date: @@DATE
 # Version: @@VERSION
 # Origin: @@ORIGIN
+# File: @@PATH
 # Released by JSS User: @@USER
 #
 ##########################################################################
