@@ -183,7 +183,7 @@ class JSSTools(object):
     def harvest(self):
         computer_reqs = self.get_all_computer_requests()
         for req in computer_reqs:
-            print 'Processing '+req['UUID']
+            print 'Processing {} from {} at {}'.format(req['UUID'], req['host'], req['date'])
             if not self.get_user_request(req['UUN'], req['UUID']):
                 print "Adding user request "+req['UUID']
                 self.add_user_request(req['UUN'], req)

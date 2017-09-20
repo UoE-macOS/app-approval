@@ -36,4 +36,4 @@ class Approvers(object):
         # return approver
         print area + ":\t" + approver
 
-        return "g.lee@ed.ac.uk"
+        return approver 
